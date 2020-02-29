@@ -39,12 +39,12 @@ client.on('message', async message => {
 	execute(message, serverQueue);
 	return;
     }
-    else if (message.startswith(`${prefix} skip`))
+    else if (message.startsWith(`${prefix} skip`))
     {
 	skip(message, serverQueue);
 	return;
     } 
-    else if (message.startswith(`${prefix} stop`))
+    else if (message.startsWith(`${prefix} stop`))
     {
 	stop(message, serverQueue);
 	return;
