@@ -28,13 +28,13 @@ client.on('error', error => {
 client.on('message', async message => {
     console.log(`Received message: ${message}`);
     if (message.author.bot ||
-	!message.content.startswith(prefix))
+	!message.content.startsWith(prefix))
     {
 	return;
     }
 
     const serverQueue = queue.get(message.guild.id);
-    if (message.content.startswith(`${prefix} play`))
+    if (message.content.startsWith(`${prefix} play`))
     {
 	execute(message, serverQueue);
 	return;
@@ -120,15 +120,18 @@ function play(guild, song)
 	return;
     }
 
-    const dispatcher = serverQueue.connection.playStream(ytdl(song.url)).on('end', () => {
+    let stream = ytdl(song.url, { filter: 'audioonly' });
+    stream.on('end', () => 
+    {
 	console.log('Music ended.');
 	serverQueue.songs.shift();
 	play(guild, serverQueue.songs[0]);
     }).on('error', error => {
 	console.log(error);
     });
+    const dispatcher = serverQueue.connection.playStream(stream);
 
-    dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    //dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 }
 
 function skip(message, serverQueue)
@@ -146,6 +149,7 @@ function skip(message, serverQueue)
 
 function stop(message, serverQueue)
 {
+    console.log(`Stopping: ${serverQueue}`);
     if (!message.member.voiceChannel)
     {
 	return message.channel.send('You have to be in a voice channel to skip a song.');
