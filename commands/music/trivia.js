@@ -52,7 +52,7 @@ module.exports = class Trivia extends Command
         message.guild.musicData.isPlaying = true;
         message.guild.triviaData.isTriviaRunning = true;
 
-        const jsonSongs = fs.readFileSync('resources/music/trivia.json', 'utf8');
+        const jsonSongs = fs.readFileSync(__dirname + '/../../resources/music/trivia.json', 'utf8');
 
         var videoDataArray = JSON.parse(jsonSongs).songs;
         const randomVideoLinks = this.getRandom(videoDataArray, numberOfSongs);
@@ -66,13 +66,14 @@ module.exports = class Trivia extends Command
                 {
                     url: randomVideoLinks[i].url,
                     singer: randomVideoLinks[i].singer,
-                    title: randomVideoLinks[i].title
+                    title: randomVideoLinks[i].title,
+                    voiceChannel
                 };
             message.guild.triviaData.triviaQueue.push(song);
         }
 
         const channelInfo = Array.from(message.member.voice.channel.members.entries());
-        channeInfo.forEach(user =>
+        channelInfo.forEach(user =>
             {
                 if (user[1].user.bot)
                 {
@@ -95,9 +96,9 @@ module.exports = class Trivia extends Command
                         message.guild.musicData.songDispatcher = dispatcher;
                         dispatcher.setVolume(message.guild.musicData.volume);
                         let songNameFound = false;
-                        let singerNameFound = false;
+                        let songSingerFound = false;
 
-                        const filter = m => message.guild.trviaData.triviaScore.has(m.author.username);
+                        const filter = m => message.guild.triviaData.triviaScore.has(m.author.username);
                         const collector = message.channel.createMessageCollector(filter, 
                             {
                                 time: 30000
@@ -177,11 +178,11 @@ module.exports = class Trivia extends Command
                                     return;
                                 }
 
-                                const sortedScoreMap = new Map([...message.guild.triviaData.triviaScores.entries()].sort((a, b) => b[1] - a[1]));
+                                const sortedScoreMap = new Map([...message.guild.triviaData.triviaScore.entries()].sort((a, b) => b[1] - a[1]));
 
-                                const song = `%{this.capitalizeWords(queue[0].singer)}: ${this.capitalizeWords(queue[0].title)}`;
+                                const song = `${this.capitalizeWords(queue[0].singer)}: ${this.capitalizeWords(queue[0].title)}`;
                                 
-                                const embed = new MessageEmbed().setColor('#ff7373').setTitle('The song was: ${song}').setDescription(this.getLeaderboard(Array.from(sortedScoreMap.entries())));
+                                const embed = new MessageEmbed().setColor('#ff7373').setTitle(`The song was: ${song}`).setDescription(this.getLeaderboard(Array.from(sortedScoreMap.entries())));
 
                                 message.channel.send(embed);
 
@@ -251,7 +252,7 @@ module.exports = class Trivia extends Command
         
         let leaderboard = '';
         
-        leaderBoard = `👑   **${arr[0][0]}:** ${arr[0][1]}  points`;
+        leaderboard = `👑   **${arr[0][0]}:** ${arr[0][1]}  points`;
 
         if (arr.length > 1)
         {

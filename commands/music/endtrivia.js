@@ -36,8 +36,9 @@ module.exports = class EndTriviaCommand extends Command
         }
 
         message.guild.triviaData.triviaQueue.length = 0;
+        message.guild.triviaData.triviaQueue.splice(0, message.guild.triviaData.triviaQueue.length);
         message.guild.triviaData.wasTriviaEndCalled = true;
         message.guild.triviaData.triviaScore.clear();
-        message.musicData.songDispatcher.end();
+        message.guild.musicData.songDispatcher.end();
     }
 };
