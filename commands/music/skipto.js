@@ -7,7 +7,7 @@ module.exports = class SkipToCommand extends Command
         super(client, 
             {
                 name: 'skipto',
-                memeberName: 'skipto',
+                memberName: 'skipto',
                 group: 'music',
                 description: 'Skip to a specific song in the queue, provide the song number as an argument',
                 guildOnly: true,
@@ -15,7 +15,7 @@ module.exports = class SkipToCommand extends Command
                 [
                     {
                         key: 'songNumber',
-                        prompt: 'What is the number in the queue you wish to skip to? For please use skip.'
+                        prompt: 'What is the number in the queue you wish to skip to? For please use skip.',
                         type: 'integer'
                     }
                 ]
