@@ -3,6 +3,8 @@ const { Structures } = require('discord.js');
 const path = require('path');
 const { prefix, token } = require('./config.json');
 
+global.__base = __dirname + '/';
+
 Structures.extend('Guild', Guild => 
 {
     class MusicGuild extends Guild 

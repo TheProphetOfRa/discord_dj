@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando');
+const { Util } = require.main.require(`${__base}util.js`);
 
 module.exports = class SkipToCommand extends Command
 {
@@ -30,16 +31,9 @@ module.exports = class SkipToCommand extends Command
             return message.reply('Please enter a valid song number');
         }
 
-        var voiceChannel = message.member.voice.channel;
-
-        if (!voiceChannel)
+        if (!Util.isInVoiceChannel(message) || !Util.isPlayingMusic(message))
         {
-            return message.reply('Join a channel and try again');
-        }
-
-        if (typeof message.guild.musicData.songDispatcher == 'undefined' || message.guild.musicData.songDispatcher == null)
-        {
-            return message.reply('There is no song playing right now');
+            return;
         }
 
         if (message.guild.musicData.queue < 1)
