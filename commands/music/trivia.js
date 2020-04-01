@@ -260,21 +260,24 @@ module.exports = class Trivia extends Command
 
     getRandom(arr, n)
     {  
-        var result = new Array(n), len = arr.length, taken = new Array(len);
-
         if (n > len)
         {
             throw new RangeError('getRandom: more elements taken than available');
         }
 
-        while (n--)
+        var currentIndex = arr.length, temporaryValue, randomIndex;
+
+        while (0 !== currentIndex)
         {
-            var x = Math.floor(Math.random() * len);
-            result[n] = arr[x in taken ? taken[x] : x];
-            taken[x] = --len in taken ? taken[len] : len;
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            temporaryValue = arr[currentIndex];
+            arr[currentIndex] = arr[randomIndex];
+            arr[randomIndex] = temporaryValue;
         }
 
-        return result;
+        return arr.slice(0, n);
     }
 
     getLeaderboard(arr)
