@@ -1,7 +1,7 @@
 {
   "name": "discord_dj",
   "version": "1.0.0",
-  "description": "## Requirements Node 12 An unprivelidged user: discord_dj",
+  "description": "",
   "main": "index.js",
   "dependencies": {
     "discord.js": "^12.1.1",
@@ -16,14 +16,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/TheProphetOfRa/discord_dj.git"
-  },
   "author": "David Hodgkinson",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/TheProphetOfRa/discord_dj/issues"
-  },
-  "homepage": "https://github.com/TheProphetOfRa/discord_dj#readme"
+  "license": "ISC"
 }
