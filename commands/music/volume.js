@@ -1,4 +1,5 @@
 const { Command } = require('discord.js-commando');
+const { Util } = require.main.require(`${__base}util.js`);
 
 module.exports = class VolumeCommand extends Command
 {
@@ -32,21 +33,12 @@ module.exports = class VolumeCommand extends Command
 
     run(message, { wantedVolume })
     {
-        const voiceChannel = message.member.voice.channel;
-      
-        if (!voiceChannel)
+        if (Util.isInVoiceChannel(message) && Util.isPlayingMusic(message))
         {
-            return message.reply('Join a voice channel and try again');
+            const volume = wantedVolume / 100;
+            message.guild.musicData.volume = volume;
+            message.guild.musicData.songDispatcher.setVolume(volume);
+            message.say(`Current volume is set to ${wantedVolume}%`);
         }
-
-        if (typeof message.guild.musicData.songDispatcher == 'undefined' || message.guild.musicData.songDispatcher == null)
-        {
-            return message.reply('There is no song playing right now');
-        }
-
-        const volume = wantedVolume / 100;
-        message.guild.musicData.volume = volume;
-        message.guild.musicData.songDispatcher.setVolume(volume);
-        message.say(`Current volume is set to ${wantedVolume}%`);
     }
 };

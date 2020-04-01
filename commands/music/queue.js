@@ -19,6 +19,19 @@ module.exports = class QueueCommand extends Command
 
     run(message)
     {
+        if (message.guild.musicData.isTriviaRunning)
+        {
+            if (message.guild.me.voice.channel == message.member.voice.channel)
+            {
+                message.guild.triviaData.triviaScore.set(message.author.username, message.guild.triviaData.triviaScore.get(message.author.username - 1));
+                return message.say("No cheating! -10 points :smiling_imp:");
+            }
+            else
+            {
+                return message.say("There is currently a quiz running, try again later.");
+            }
+        }
+    
         if (message.guild.musicData.queue.length == 0)
         {
             return message.say('There are no songs in the queue, why not queue some up with the play command!');

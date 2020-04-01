@@ -9,32 +9,33 @@ module.exports = class PlayCommand extends Command
 {
     constructor(client)
     {
-        super(client, {
-            name: 'play',
-            memberName: 'play',
-            group: 'music',
-            description: 'Play any song or playlist from youtube',
-            guildOnly: true,
-            clientPermissions: ['SPEAK', 'CONNECT'],
-            args: [
-                {
-                    key: 'query',
-                    prompt: 'What song would you like to listen to?',
-                    type: 'string',
-                    validate: query => query.length > 0 && query.length < 200
-                }
-            ]
-        });
+        super(client, 
+            {
+                name: 'play',
+                memberName: 'play',
+                group: 'music',
+                description: 'Play any song or playlist from youtube',
+                guildOnly: true,
+                clientPermissions: ['SPEAK', 'CONNECT'],
+                args: 
+                [
+                    {
+                        key: 'query',
+                        prompt: 'What song would you like to listen to?',
+                        type: 'string',
+                        validate: query => query.length > 0 && query.length < 200
+                    }
+                ]
+            }
+        );
     }
 
     async run(message, { query })
     {
-        var voiceChannel = message.member.voice.channel;
-        if (!voiceChannel)
+        if (!Util.isInVoiceChannel(messag))
         {
-            return message.say('Join a voice channel and try again');
-        }
-    
+            return; 
+        } 
 
 	if (query.match(/^(?!.*\?.*\bv=)https:\/\/www\.youtube\.com\/.*\?.*\blist=.*$/))
 	{
@@ -96,13 +97,14 @@ module.exports = class PlayCommand extends Command
                 {
                     duration = 'Live Stream';
                 }
-                const song = {
-                    url,
-                    title,
-                    duration,
-                    thumbnail,
-                    voiceChannel
-                };
+                const song = 
+                    {
+                        url,
+                        title,
+                        duration,
+                        thumbnail,
+                        voiceChannel
+                    };
                 message.guild.musicData.queue.push(song);
                 if (message.guild.musicData.isPlaying == false)
                 {
@@ -186,13 +188,14 @@ module.exports = class PlayCommand extends Command
                 {
                     duration = 'Live Stream';
                 }
-                const song = {
-                    url,
-                    title,
-                    duration,
-                    thumbnail,
-                    voiceChannel
-                };
+                const song = 
+                    {
+                        url,
+                        title,
+                        duration,
+                        thumbnail,
+                        voiceChannel
+                    };
 
                 message.guild.musicData.queue.push(song);
 
