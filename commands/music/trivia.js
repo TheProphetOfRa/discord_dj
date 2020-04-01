@@ -107,41 +107,26 @@ module.exports = class Trivia extends Command
                         
                         collector.on('collect', m => 
                             {
-                                let neededTitle = queue[0].title.toLowerCase();
-                                let neededSinger = queue[0].singer.toLowerCase();
+                                if (!message.guild.triviaData.triviaScore.has(m.author.username) || (m.content.startsWith(this.client.comandPrefix)))
+                                {
+                                    return;
+                                }
 
-                                if (!message.guild.triviaData.triviaScore.has(m.author.username))
+                                if (!songNameFound && this.checkTitleMatches(m.content.toLowerCase(), queue[0]))
                                 {
-                                    return;
-                                }
-                                if (m.content.startsWith(this.client.comandPrefix))
-                                {
-                                    return;
-                                }
-                                if (m.content.toLowerCase() === neededTitle)
-                                {
-                                    if (songNameFound)
-                                    {
-                                        return;
-                                    }
-                                    
                                     songNameFound = true;
-                        
+
                                     if (songNameFound && songSingerFound)
                                     {
                                         collector.stop();
                                     }
 
+                                    
                                     m.react('☑');
                                     message.guild.triviaData.triviaScore.set(m.author.username, message.guild.triviaData.triviaScore.get(m.author.username) + 1);
                                 }
-                                else if (m.content.toLowerCase() === neededSinger)
+                                else if (!songSingerFound && this.checkSingerMatches(m.content.toLowerCase(), queue[0]))
                                 {
-                                    if (songSingerFound)
-                                    {
-                                        return;
-                                    }
-
                                     songSingerFound = true;
     
                                     if (songSingerFound && songNameFound)
@@ -151,8 +136,9 @@ module.exports = class Trivia extends Command
 
                                     m.react('☑')
                                     message.guild.triviaData.triviaScore.set(m.author.username, message.guild.triviaData.triviaScore.get(m.author.username) + 1);
+
                                 }
-                                else if (m.content.toLowerCase() === neededSinger + ' ' + neededTitle || m.content.toLowerCase() === neededTitle + ' ' + neededSinger)
+                                else if ((!songSingerFound || !songNameFounad) && this.checkSingerAndTitleMatches(m.content.toLowerCase(), queue[0]))
                                 {
                                     if (!songSingerFound && !songNameFound)
                                     {
@@ -180,7 +166,7 @@ module.exports = class Trivia extends Command
 
                                 const sortedScoreMap = new Map([...message.guild.triviaData.triviaScore.entries()].sort((a, b) => b[1] - a[1]));
 
-                                const song = `${this.capitalizeWords(queue[0].singer)}: ${this.capitalizeWords(queue[0].title)}`;
+                                const song = `${this.capitalizeWords(queue[0].singer[0])}: ${this.capitalizeWords(queue[0].title[0])}`;
                                 
                                 const embed = new MessageEmbed().setColor('#ff7373').setTitle(`The song was: ${song}`).setDescription(this.getLeaderboard(Array.from(sortedScoreMap.entries())));
 
@@ -222,6 +208,54 @@ module.exports = class Trivia extends Command
                 );
             } 
         );
+    }
+
+    checkTitleMatches(givenAnswer, currentInfo)
+    {
+        //Iterate through the title and aliases
+        for (let i = 0 ; i < currentInfo.title.length ; ++i)
+        {
+            if (givenAnswer == currentInfo.title[i].toLowerCase())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    checkSingerMatches(givenAnswer, currentInfo)
+    {
+        //Iterate through the singer and aliases 
+        for (let i = 0 ; i < currentInfo.singer.length ; ++i)
+        {
+            if (givenAnswer == currentInfo.singer[i].toLowerCase())
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    checkSingerAndTitleMatches(givenAnswer, currentInfo)
+    {
+        //Iterate through the singer and title and aliases
+        for (let i = 0 ; i < currentInfo.singer.length ; ++i)
+        {
+            for (let j = 0 ; j < currentInfo.title.length ; ++j)
+            {
+                let combo = currentInfo.singer[i].toLowerCase() + ' ' + currentInfo.title[j].toLowerCase();
+                let reverseCombo = currentInfo.title[j].toLowerCase() + ' ' + currentInfo.singer[i].toLowerCase();
+
+                if (givenAnswer == combo || givenAnswer == reverseCombo)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     getRandom(arr, n)
