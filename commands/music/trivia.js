@@ -138,7 +138,7 @@ module.exports = class Trivia extends Command
                                     message.guild.triviaData.triviaScore.set(m.author.username, message.guild.triviaData.triviaScore.get(m.author.username) + 1);
 
                                 }
-                                else if ((!songSingerFound || !songNameFounad) && this.checkSingerAndTitleMatches(m.content.toLowerCase(), queue[0]))
+                                else if ((!songSingerFound || !songNameFound) && this.checkSingerAndTitleMatches(m.content.toLowerCase(), queue[0]))
                                 {
                                     if (!songSingerFound && !songNameFound)
                                     {
@@ -260,7 +260,7 @@ module.exports = class Trivia extends Command
 
     getRandom(arr, n)
     {  
-        if (n > len)
+        if (n > arr.length)
         {
             throw new RangeError('getRandom: more elements taken than available');
         }
