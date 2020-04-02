@@ -138,7 +138,7 @@ module.exports = class Trivia extends Command
                                     message.guild.triviaData.triviaScore.set(m.author.username, message.guild.triviaData.triviaScore.get(m.author.username) + 1);
 
                                 }
-                                else if ((!songSingerFound || !songNameFounad) && this.checkSingerAndTitleMatches(m.content.toLowerCase(), queue[0]))
+                                else if ((!songSingerFound || !songNameFound) && this.checkSingerAndTitleMatches(m.content.toLowerCase(), queue[0]))
                                 {
                                     if (!songSingerFound && !songNameFound)
                                     {
@@ -260,21 +260,24 @@ module.exports = class Trivia extends Command
 
     getRandom(arr, n)
     {  
-        var result = new Array(n), len = arr.length, taken = new Array(len);
-
-        if (n > len)
+        if (n > arr.length)
         {
             throw new RangeError('getRandom: more elements taken than available');
         }
 
-        while (n--)
+        var currentIndex = arr.length, temporaryValue, randomIndex;
+
+        while (0 !== currentIndex)
         {
-            var x = Math.floor(Math.random() * len);
-            result[n] = arr[x in taken ? taken[x] : x];
-            taken[x] = --len in taken ? taken[len] : len;
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            temporaryValue = arr[currentIndex];
+            arr[currentIndex] = arr[randomIndex];
+            arr[randomIndex] = temporaryValue;
         }
 
-        return result;
+        return arr.slice(0, n);
     }
 
     getLeaderboard(arr)
