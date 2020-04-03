@@ -12,7 +12,11 @@ namespace Discord_DJ.Model
 {
     public class MusicPlayer
     {
+        public delegate void OnFinishedQueueDelegate(MusicPlayer player);
+
         private readonly GoogleAPIService _googleAPIService;
+
+        public event OnFinishedQueueDelegate OnFinishedQueue;
 
         private IVoiceChannel _channel = null;
         public IVoiceChannel Channel 
@@ -23,14 +27,24 @@ namespace Discord_DJ.Model
             }
         }
 
+        private ulong _guildId;
+        public ulong GuildId
+        {
+            get
+            {
+                return _guildId;
+            }
+        }
+
         private IAudioClient _audioConnection = null;
 
         private bool _isPlaying = false;
         
         private List<string> _queuedUrls = new List<string>();
 
-        public MusicPlayer(IServiceProvider services)
+        public MusicPlayer(ulong guildId, IServiceProvider services)
         {
+            _guildId = guildId;
             _googleAPIService = services.GetRequiredService<GoogleAPIService>();
         }
 
@@ -109,6 +123,7 @@ namespace Discord_DJ.Model
                     {                        
                         await _channel.DisconnectAsync();
                         _isPlaying = false;
+                        OnFinishedQueue(this);
                     }
                 }
             }
