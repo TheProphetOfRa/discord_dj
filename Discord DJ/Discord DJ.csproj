@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.1.1" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.45.0.1897" />
+    <PackageReference Include="ytdl-cs" Version="1.0.5" />
   </ItemGroup>
 
 </Project>

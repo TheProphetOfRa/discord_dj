@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using static Discord_DJ.Model.MusicPlayer;
 
 namespace Discord_DJ.Services
 {
@@ -49,7 +50,7 @@ namespace Discord_DJ.Services
             return await guildPlayer.SkipTo(channel, songIndex);
         }
 
-        public List<string> Queue(ulong guildId)
+        public List<VideoInfo> Queue(ulong guildId)
         {
             MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);
             return guildPlayer.Queue;

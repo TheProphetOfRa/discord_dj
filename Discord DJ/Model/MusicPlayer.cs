@@ -14,9 +14,16 @@ namespace Discord_DJ.Model
 {
     public class MusicPlayer
     {
+        public class VideoInfo
+        {
+            public string title;
+            public string url;
+        };
+
         public delegate void OnFinishedQueueDelegate(MusicPlayer player);
 
         private readonly GoogleAPIService _googleAPIService;
+        private readonly YoutubeDLService _youtubeDLService;
 
         public event OnFinishedQueueDelegate OnFinishedQueue;
 
@@ -42,12 +49,12 @@ namespace Discord_DJ.Model
 
         private bool _isPlaying = false;
         
-        private List<string> _queuedUrls = new List<string>();
-        public List<string> Queue
+        private List<VideoInfo> _queue = new List<VideoInfo>();
+        public List<VideoInfo> Queue
         {
             get
             {
-                return _queuedUrls;
+                return _queue;
             }
         }
 
@@ -61,6 +68,7 @@ namespace Discord_DJ.Model
         {
             _guildId = guildId;
             _googleAPIService = services.GetRequiredService<GoogleAPIService>();
+            _youtubeDLService = services.GetRequiredService<YoutubeDLService>();
         }
 
         public async Task<MusicServiceResult> TryQueue(IVoiceChannel channel, string musicRequest)
@@ -79,26 +87,27 @@ namespace Discord_DJ.Model
 
             Regex singleVideoDetector = new Regex(@"(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+");
 
-            string videoUrl = null;
+            VideoInfo video = null;
 
             if (!singleVideoDetector.IsMatch(musicRequest))
             {
-                videoUrl = await _googleAPIService.TryGetVideoUrlForSearchTerms(musicRequest);
-                if (string.IsNullOrEmpty(videoUrl))
-                {
-                    return MusicServiceResult.FailedToGetResults;
-                }
+                video = await _googleAPIService.TryGetVideoForSearchTerms(musicRequest);
             }
             else
             {
-                videoUrl = musicRequest;
+                video = await _youtubeDLService.GetInfoForVideoUrl(musicRequest);
             }
 
-            _queuedUrls.Add(videoUrl);
+            if (video == null)
+            {
+                return MusicServiceResult.FailedToGetResults;
+            }
+
+            _queue.Add(video);
 
             if (!_isPlaying)
             {
-                Play(_queuedUrls[0]);
+                Play(_queue[0]);
             }
 
             return MusicServiceResult.Success;
@@ -109,10 +118,10 @@ namespace Discord_DJ.Model
             _audioConnection = await _channel.ConnectAsync();
         }
 
-        private async Task Play(string url)
+        private async Task Play(VideoInfo video)
         {
             _isPlaying = true;
-            _queuedUrls.RemoveAt(0);
+            _queue.RemoveAt(0);
 
             if (_audioConnection == null || _audioConnection.ConnectionState == ConnectionState.Disconnected || _audioConnection.ConnectionState == ConnectionState.Disconnecting)
             {
@@ -120,7 +129,7 @@ namespace Discord_DJ.Model
             }
 
             _streamCanceller = new CancellationTokenSource();
-            _streamProcess = CreateStream(url);
+            _streamProcess = CreateStream(video.url);
             _outputStream = _streamProcess.StandardOutput.BaseStream;
             _discordStream = _audioConnection.CreatePCMStream(AudioApplication.Music);
 
@@ -134,9 +143,9 @@ namespace Discord_DJ.Model
                 _streamProcess.Dispose();
                 _outputStream.Dispose();
                 _discordStream.Dispose();
-                if (_queuedUrls.Count > 0)
+                if (_queue.Count > 0)
                 {
-                    Play(_queuedUrls[0]);
+                    Play(_queue[0]);
                 }
                 else
                 {
@@ -154,7 +163,7 @@ namespace Discord_DJ.Model
                 return MusicServiceResult.AlreadyPlayingInAnotherChannel;                
             }
 
-            _queuedUrls.Clear();
+            _queue.Clear();
             _streamCanceller.Cancel();
 
             return MusicServiceResult.Success;
@@ -181,7 +190,7 @@ namespace Discord_DJ.Model
                 return MusicServiceResult.AlreadyPlayingInAnotherChannel;
             }
 
-            _queuedUrls.RemoveRange(0, songIndex - 1);
+            _queue.RemoveRange(0, songIndex - 1);
 
             //Cache this locally as the recursive Play function will set up a new one for the next track which will be associated with the member variable
             CancellationTokenSource canceller = _streamCanceller;

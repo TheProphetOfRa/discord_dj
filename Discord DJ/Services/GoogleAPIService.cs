@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using static Discord_DJ.Model.MusicPlayer;
 
 namespace Discord_DJ.Services
 {
@@ -23,7 +24,7 @@ namespace Discord_DJ.Services
             });
         }
 
-        public async Task<string> TryGetVideoUrlForSearchTerms(string searchTerms)
+        public async Task<VideoInfo> TryGetVideoForSearchTerms(string searchTerms)
         {
             SearchResource.ListRequest searchRequest = _youtubeService.Search.List("snippet");
             searchRequest.Q = searchTerms;
@@ -31,10 +32,13 @@ namespace Discord_DJ.Services
             var searchResponse = await searchRequest.ExecuteAsync();
 
             foreach (var result in searchResponse.Items)
-            {
+            {                
                 if (result.Id.Kind == "youtube#video")
                 {
-                    return "https://www.youtube.com/watch?v=" + result.Id.VideoId;
+                    VideoInfo info = new VideoInfo();
+                    info.url = "https://www.youtube.com/watch?v=" + result.Id.VideoId;
+                    info.title = result.Snippet.Title;
+                    return info;
                 }
             }
 

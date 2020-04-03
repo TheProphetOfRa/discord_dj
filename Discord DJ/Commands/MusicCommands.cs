@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord_DJ.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static Discord_DJ.Model.MusicPlayer;
 
 namespace Discord_DJ.Commands
 {
@@ -106,7 +107,7 @@ namespace Discord_DJ.Commands
                 return;
             }
 
-            List<string> queue = MusicService.Queue(Context.Guild.Id);
+            List<VideoInfo> queue = MusicService.Queue(Context.Guild.Id);
 
             if (queue.Count == 0)
             {
@@ -117,9 +118,9 @@ namespace Discord_DJ.Commands
             EmbedBuilder builder = new EmbedBuilder();
             builder.WithTitle("Queue:");
             int count = 1;
-            foreach (string entry in queue)
+            foreach (VideoInfo entry in queue)
             {
-                builder.AddField(count.ToString(), entry, true);
+                builder.AddField(count.ToString(), entry.title, true);
                 count++;
             }
 
