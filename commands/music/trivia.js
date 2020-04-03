@@ -28,7 +28,7 @@ module.exports = class Trivia extends Command
                         prompt: 'What is the number of songs you want to run?',
                         type: 'integer',
                         default: 5,
-                        max: 15
+                        max: 50
                     }
                 ]
             }

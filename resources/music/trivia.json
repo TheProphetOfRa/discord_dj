@@ -458,7 +458,7 @@
         },
         {
           "url": "https://www.youtube.com/watch?v=DSxg7pNYQhI",
-          "singer": ["ac/dc"],
+          "singer": ["ac/dc", "acdc", "ac dc"],
           "title": ["back in black"]
         },
         {
@@ -682,7 +682,7 @@
             "title": ["cake by the ocean"]
         },
         {
-            "url": "https://www.youtube.com/watch?v=vcESQKRnKuE",
+            "url": "https://www.youtube.com/watch?v=aCyGvGEtOwc",
             "singer": ["paramore"],
             "title": ["misery business"]
         },
@@ -733,7 +733,7 @@
         },
         {
             "url": "https://www.youtube.com/watch?v=mbom691n-14",
-            "singer": ["The Lion King", "timone & pumba", "disney"],
+            "singer": ["The Lion King", "lion king", "timone and pumba", "timone & pumba", "disney"],
             "title": ["hakuna matata"]
         },
         {
