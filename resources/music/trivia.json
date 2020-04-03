@@ -750,6 +750,11 @@
             "url": "https://www.youtube.com/watch?v=ERw2LuU6Jj8",
             "singer": ["vanessa carlton"],
             "title": ["a thousand miles"]
+        },
+        {
+            "url": "https://www.youtube.com/watch?v=1nCqRmx3Dnw",
+            "singer": ["Will Smith", "the fresh prince", "fresh prince"],
+            "title": ["the fresh prince of bel air", "fresh prince of bel air", "fresh prince", "the fresh prince"]
         }
     ]
 }
