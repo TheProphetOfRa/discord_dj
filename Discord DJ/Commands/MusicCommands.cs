@@ -41,7 +41,7 @@ namespace Discord_DJ.Commands
 
             YouTubeService ytService = new YouTubeService(new BaseClientService.Initializer()
             {
-                ApiKey = "",
+                ApiKey = Config.YoutubeAPIKey,
                 ApplicationName = this.GetType().ToString()
             });
 

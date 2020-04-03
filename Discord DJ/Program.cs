@@ -17,6 +17,8 @@ namespace Discord_DJ
 
         public async Task MainAsync()
         {
+            Config.LoadConfig();
+
             m_client = new DiscordSocketClient();
 
             m_commandService = new CommandService();
@@ -27,7 +29,7 @@ namespace Discord_DJ
             m_client.Log += Log;
 
             //TODO: Load config json file with token instead of env variable
-            await m_client.LoginAsync(TokenType.Bot, "");
+            await m_client.LoginAsync(TokenType.Bot, Config.BotAPIKey);
             await m_client.StartAsync();
 
             //Block until program quits
