@@ -6,13 +6,9 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Discord_DJ.Commands
 {
@@ -37,72 +33,55 @@ namespace Discord_DJ.Commands
 
             Regex singleVideoDetector = new Regex(@"(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+");
 
-            VideoInfo info = new VideoInfo("");
-
             YouTubeService ytService = new YouTubeService(new BaseClientService.Initializer()
             {
                 ApiKey = Config.YoutubeAPIKey,
                 ApplicationName = this.GetType().ToString()
             });
 
-            if (singleVideoDetector.IsMatch(music))
+            string videoUrl = null;
+
+            if (!singleVideoDetector.IsMatch(music))
             {
-                Console.WriteLine("Sent video link");
-                Uri videoUri = new Uri(music);
-                NameValueCollection query = HttpUtility.ParseQueryString(videoUri.Query);
-                String videoId = "";
+                List<Google.Apis.YouTube.v3.Data.SearchResult> videos = new List<Google.Apis.YouTube.v3.Data.SearchResult>();
+                SearchResource.ListRequest searchRequest = ytService.Search.List("snippet");
+                searchRequest.Q = music;
+                searchRequest.MaxResults = 5;
+                SearchListResponse searchResponse = await searchRequest.ExecuteAsync();
 
-                if (query.AllKeys.Contains("v"))
+                foreach (var result in searchResponse.Items)
                 {
-                    videoId = query["v"];
+                    if (result.Id.Kind == "youtube#video")
+                    {
+                        videoUrl = "https://www.youtube.com/watch?v=" + result.Id.VideoId;
+                        break;
+                    }
                 }
-                else
+
+                if (string.IsNullOrEmpty(videoUrl))
                 {
-                    videoId = videoUri.Segments.Last();
+                    await ReplyAsync("Could not find any videos matching those terms. Please try again");
                 }
-
-                Console.WriteLine("Video Id: " + videoId);
-
-                info = new VideoInfo(videoId);
-                await info.GetVideoInfo();
-                Console.WriteLine("Got video data");
             }
             else
             {
-                List<Google.Apis.YouTube.v3.Data.SearchResult> videos = new List<Google.Apis.YouTube.v3.Data.SearchResult>();
-                SearchResource.ListRequest searchRequest = ytService.Search.List(music);
-                SearchListResponse searchResponse = await searchRequest.ExecuteAsync();
-                foreach (Google.Apis.YouTube.v3.Data.SearchResult searchResult in searchResponse.Items)
-                {
-                    switch (searchResult.Id.Kind)
-                    {
-                        case "youtube#video":
-                            videos.Add(searchResult);
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                videoUrl = music;
             }
-
-            Console.WriteLine("Trying to stream: " + music);
 
             var audioClient = await channel.ConnectAsync();
 
             try
             {
-                using (var ffplay = CreateStream(music))
+                using (var ffplay = CreateStream(videoUrl))
                 using (var output = ffplay.StandardOutput.BaseStream)
                 using (var discord = audioClient.CreatePCMStream(AudioApplication.Music))
                 {
                     try
                     {
-                        Console.WriteLine("Streaming");
                         await output.CopyToAsync(discord);
                     }
                     finally
                     {
-                        Console.WriteLine("Flushing");
                         await discord.FlushAsync();
                         await channel.DisconnectAsync();
                     }
@@ -113,7 +92,6 @@ namespace Discord_DJ.Commands
                 Console.WriteLine(e.ToString());
             }
         }
-
 
         private Process CreateStream(string url)
         {

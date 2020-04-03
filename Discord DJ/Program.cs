@@ -24,7 +24,7 @@ namespace Discord_DJ
             m_commandService = new CommandService();
             m_commandHandler = new CommandHandler(m_client, m_commandService);
 
-            m_commandHandler.InstallCommandsAsync();
+            await m_commandHandler.InstallCommandsAsync();
 
             m_client.Log += Log;
 
