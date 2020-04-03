@@ -5,7 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Discord_DJ.Model
@@ -41,6 +43,19 @@ namespace Discord_DJ.Model
         private bool _isPlaying = false;
         
         private List<string> _queuedUrls = new List<string>();
+        public List<string> Queue
+        {
+            get
+            {
+                return _queuedUrls;
+            }
+        }
+
+        Process _streamProcess = null;
+        Stream _outputStream = null;
+        AudioOutStream _discordStream = null;
+        CancellationTokenSource _streamCanceller = null;
+
 
         public MusicPlayer(ulong guildId, IServiceProvider services)
         {
@@ -104,29 +119,59 @@ namespace Discord_DJ.Model
                 await ConnectToChannel();
             }
 
-            using (var ffplay = CreateStream(url))
-            using (var output = ffplay.StandardOutput.BaseStream)
-            using (var discord = _audioConnection.CreatePCMStream(AudioApplication.Music))
+            _streamCanceller = new CancellationTokenSource();
+            _streamProcess = CreateStream(url);
+            _outputStream = _streamProcess.StandardOutput.BaseStream;
+            _discordStream = _audioConnection.CreatePCMStream(AudioApplication.Music);
+
+            try
             {
-                try
+                await _outputStream.CopyToAsync(_discordStream, _streamCanceller.Token);
+            }
+            finally
+            {
+                await _discordStream.FlushAsync();
+                _streamProcess.Dispose();
+                _outputStream.Dispose();
+                _discordStream.Dispose();
+                if (_queuedUrls.Count > 0)
                 {
-                    await output.CopyToAsync(discord);
+                    Play(_queuedUrls[0]);
                 }
-                finally
+                else
                 {
-                    await discord.FlushAsync();
-                    if (_queuedUrls.Count > 0)
-                    {
-                        Play(_queuedUrls[0]);
-                    }
-                    else
-                    {                        
-                        await _channel.DisconnectAsync();
-                        _isPlaying = false;
-                        OnFinishedQueue(this);
-                    }
+                    await _channel.DisconnectAsync();
+                    _isPlaying = false;
+                    OnFinishedQueue(this);
                 }
             }
+        }
+
+        public async Task<MusicServiceResult> Stop(IVoiceChannel channel)
+        {
+            if (_isPlaying && _channel.Id != channel.Id)
+            {
+                return MusicServiceResult.AlreadyPlayingInAnotherChannel;                
+            }
+
+            _queuedUrls.Clear();
+            _streamCanceller.Cancel();
+
+            return MusicServiceResult.Success;
+        }
+
+        public async Task<MusicServiceResult> Skip(IVoiceChannel channel)
+        {
+            if (_isPlaying && _channel.Id != channel.Id)
+            {
+                return MusicServiceResult.AlreadyPlayingInAnotherChannel;
+            }
+
+            //Cache this locally as the recursive Play function will set up a new one for the next track which will be associated with the member variable
+            CancellationTokenSource canceller = _streamCanceller;
+            canceller.Cancel();
+            canceller.Dispose();
+            return MusicServiceResult.Success;
         }
 
         private Process CreateStream(string url) //TODO: Move this to it's own class that can return the relevant process based on system

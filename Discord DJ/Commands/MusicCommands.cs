@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord_DJ.Services;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Discord_DJ.Commands
@@ -36,6 +37,70 @@ namespace Discord_DJ.Commands
             {
                 await ReplyAsync("I'm already playing in another channel. Come join in!");
             }
+        }
+
+        [Command("stop")]
+        public async Task Stop()
+        {
+            var channel = (Context.User as IGuildUser)?.VoiceChannel;
+            if (channel == null)
+            {
+                await Context.Channel.SendMessageAsync("You need to be in a voice channel to stop music.");
+                return;
+            }
+
+            MusicServiceResult result = await MusicService.Stop(Context.Guild.Id, channel);
+            if (result == MusicServiceResult.AlreadyPlayingInAnotherChannel)
+            {
+                await ReplyAsync("I'm not playing music in your channel");
+            }
+        }
+
+        [Command("skip")]
+        public async Task Skip()
+        {
+            var channel = (Context.User as IGuildUser)?.VoiceChannel;
+            if (channel == null)
+            {
+                await Context.Channel.SendMessageAsync("You need to be in a voice channel to skip music.");
+                return;
+            }
+
+            MusicServiceResult result = await MusicService.Skip(Context.Guild.Id, channel);
+            if (result == MusicServiceResult.AlreadyPlayingInAnotherChannel)
+            {
+                await ReplyAsync("I'm not playing music in your channel");
+            }
+        }
+
+        [Command("queue")]
+        public async Task Queue()
+        {
+            var channel = (Context.User as IGuildUser)?.VoiceChannel;
+            if (channel == null)
+            {
+                await Context.Channel.SendMessageAsync("You need to be in a voice channel to view the queue.");
+                return;
+            }
+
+            List<string> queue = MusicService.Queue(Context.Guild.Id);
+
+            if (queue.Count == 0)
+            {
+                ReplyAsync("There are no more songs in the queue. Let's add some!");
+                return;
+            }
+
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.WithTitle("Queue:");
+            int count = 1;
+            foreach (string entry in queue)
+            {
+                builder.AddField(count.ToString(), entry, true);
+                count++;
+            }
+
+            await ReplyAsync("", false, builder.Build());
         }
     }
 }

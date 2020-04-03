@@ -26,8 +26,33 @@ namespace Discord_DJ.Services
 
         public async Task<MusicServiceResult> TryAddToGuidQueue(ulong guildId, IVoiceChannel channel, string musicRequest)
         {
-            MusicPlayer guildPlayer = null;
+            MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);
 
+            return await guildPlayer.TryQueue(channel, musicRequest);
+        }
+
+        public async Task<MusicServiceResult> Stop(ulong guildId, IVoiceChannel channel)
+        {
+            MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);
+            return await guildPlayer.Stop(channel);            
+        }
+
+        public async Task<MusicServiceResult> Skip(ulong guildId, IVoiceChannel channel)
+        {
+            MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);
+            return await guildPlayer.Skip(channel);
+        }
+
+        public List<string> Queue(ulong guildId)
+        {
+            MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);
+            return guildPlayer.Queue;
+        }
+
+        private MusicPlayer GetMusicPlayerForGuild(ulong guildId)
+        {
+            MusicPlayer guildPlayer = null;
+            
             if (!_mapGuildToMusicPlayer.ContainsKey(guildId))
             {
                 guildPlayer = new MusicPlayer(guildId, _services);
@@ -39,7 +64,7 @@ namespace Discord_DJ.Services
                 guildPlayer = _mapGuildToMusicPlayer[guildId];
             }
 
-            return await guildPlayer.TryQueue(channel, musicRequest);
+            return guildPlayer;
         }
 
         private void OnMusicPlayerFinished(MusicPlayer player)
