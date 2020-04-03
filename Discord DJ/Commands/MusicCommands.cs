@@ -1,17 +1,13 @@
 ﻿using Discord;
-using Discord.Audio;
 using Discord.Commands;
 using Discord_DJ.Services;
-using System;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Discord_DJ.Commands
 {
     public class MusicModule : ModuleBase<SocketCommandContext>
     {
-        public GoogleAPIService GoogleAPIService { get; set; }
+        public MusicService MusicService { get; set; }
 
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play some music from youtube")]
@@ -30,60 +26,16 @@ namespace Discord_DJ.Commands
                 return;
             }
 
-            Regex singleVideoDetector = new Regex(@"(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+");
+            MusicServiceResult result = await MusicService.TryAddToGuidQueue(Context.Guild.Id, channel, music);
 
-            string videoUrl = null;
-
-            if (!singleVideoDetector.IsMatch(music))
+            if (result == MusicServiceResult.FailedToGetResults)
             {
-                videoUrl = await GoogleAPIService.TryGetVideoUrlForSearchTerms(music);
-                if (string.IsNullOrEmpty(videoUrl))
-                {
-                    await ReplyAsync("Could not find any videos matching those terms. Please try again");
-                    return;
-                }
+                await ReplyAsync("Your search may have returned no results. Please try again.");
             }
-            else
+            else if (result == MusicServiceResult.AlreadyPlayingInAnotherChannel)
             {
-                videoUrl = music;
+                await ReplyAsync("I'm already playing in another channel. Come join in!");
             }
-
-            var audioClient = await channel.ConnectAsync();
-
-            try
-            {
-                using (var ffplay = CreateStream(videoUrl))
-                using (var output = ffplay.StandardOutput.BaseStream)
-                using (var discord = audioClient.CreatePCMStream(AudioApplication.Music))
-                {
-                    try
-                    {
-                        await output.CopyToAsync(discord);
-                    }
-                    finally
-                    {
-                        await discord.FlushAsync();
-                        await channel.DisconnectAsync();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        private Process CreateStream(string url)
-        {
-            string args = $"/C youtube-dl -o - {url} | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1";
-            return Process.Start(new ProcessStartInfo
-            {
-                FileName = "cmd.exe",
-                Arguments = args,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true
-            });
         }
     }
 }

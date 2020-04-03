@@ -47,6 +47,7 @@ namespace Discord_DJ
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<GoogleAPIService>()
+                .AddSingleton<MusicService>()
                 .BuildServiceProvider();
         }
     }

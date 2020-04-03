@@ -10,11 +10,13 @@ namespace Discord_DJ.Services
 {
     public class GoogleAPIService
     {
-        private YouTubeService m_youtubeService;
+        private YouTubeService _youtubeService;
+        private readonly IServiceProvider _services;
 
-        public GoogleAPIService()
+        public GoogleAPIService(IServiceProvider services)
         {
-            m_youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            _services = services;
+            _youtubeService = new YouTubeService(new BaseClientService.Initializer()
             {
                 ApiKey = Config.YoutubeAPIKey,
                 ApplicationName = this.GetType().ToString()
@@ -23,7 +25,7 @@ namespace Discord_DJ.Services
 
         public async Task<string> TryGetVideoUrlForSearchTerms(string searchTerms)
         {
-            SearchResource.ListRequest searchRequest = m_youtubeService.Search.List("snippet");
+            SearchResource.ListRequest searchRequest = _youtubeService.Search.List("snippet");
             searchRequest.Q = searchTerms;
             searchRequest.MaxResults = 5;
             var searchResponse = await searchRequest.ExecuteAsync();
