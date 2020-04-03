@@ -4,42 +4,50 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Threading.Tasks;
+using Discord_DJ.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Discord_DJ
 {
     public class Program
     {
-        private DiscordSocketClient m_client;
-        private CommandService m_commandService;
-        private CommandHandler m_commandHandler;
-
         public static void Main(string[] args) => new Program().MainAsync().GetAwaiter().GetResult();
 
         public async Task MainAsync()
         {
             Config.LoadConfig();
 
-            m_client = new DiscordSocketClient();
+            using (var services = ConfigureServices())
+            {
+                var m_client = services.GetRequiredService<DiscordSocketClient>();                            
 
-            m_commandService = new CommandService();
-            m_commandHandler = new CommandHandler(m_client, m_commandService);
+                m_client.Log += Log;
+                services.GetRequiredService<CommandService>().Log += Log;
 
-            await m_commandHandler.InstallCommandsAsync();
+                await m_client.LoginAsync(TokenType.Bot, Config.BotAPIKey);
+                await m_client.StartAsync();
 
-            m_client.Log += Log;
+                await services.GetRequiredService<CommandHandlingService>().InitialiseAsync();
 
-            //TODO: Load config json file with token instead of env variable
-            await m_client.LoginAsync(TokenType.Bot, Config.BotAPIKey);
-            await m_client.StartAsync();
-
-            //Block until program quits
-            await Task.Delay(-1);
+                //Block until program quits
+                await Task.Delay(-1);
+            }            
         }
 
         private Task Log(LogMessage msg)
         {
             Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
+        }
+
+        private ServiceProvider ConfigureServices()
+        {
+            return new ServiceCollection()
+                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton<CommandService>()
+                .AddSingleton<CommandHandlingService>()
+                .AddSingleton<GoogleAPIService>()
+                .BuildServiceProvider();
         }
     }
 }

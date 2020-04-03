@@ -1,11 +1,8 @@
 ﻿using Discord;
 using Discord.Audio;
 using Discord.Commands;
-using Google.Apis.Services;
-using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
+using Discord_DJ.Services;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -14,6 +11,8 @@ namespace Discord_DJ.Commands
 {
     public class MusicModule : ModuleBase<SocketCommandContext>
     {
+        public GoogleAPIService GoogleAPIService { get; set; }
+
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Play some music from youtube")]
         public async Task PlayAsync([Remainder] [Summary("The link or search term")] string music = "")
@@ -33,34 +32,15 @@ namespace Discord_DJ.Commands
 
             Regex singleVideoDetector = new Regex(@"(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+");
 
-            YouTubeService ytService = new YouTubeService(new BaseClientService.Initializer()
-            {
-                ApiKey = Config.YoutubeAPIKey,
-                ApplicationName = this.GetType().ToString()
-            });
-
             string videoUrl = null;
 
             if (!singleVideoDetector.IsMatch(music))
             {
-                List<Google.Apis.YouTube.v3.Data.SearchResult> videos = new List<Google.Apis.YouTube.v3.Data.SearchResult>();
-                SearchResource.ListRequest searchRequest = ytService.Search.List("snippet");
-                searchRequest.Q = music;
-                searchRequest.MaxResults = 5;
-                SearchListResponse searchResponse = await searchRequest.ExecuteAsync();
-
-                foreach (var result in searchResponse.Items)
-                {
-                    if (result.Id.Kind == "youtube#video")
-                    {
-                        videoUrl = "https://www.youtube.com/watch?v=" + result.Id.VideoId;
-                        break;
-                    }
-                }
-
+                videoUrl = await GoogleAPIService.TryGetVideoUrlForSearchTerms(music);
                 if (string.IsNullOrEmpty(videoUrl))
                 {
                     await ReplyAsync("Could not find any videos matching those terms. Please try again");
+                    return;
                 }
             }
             else
