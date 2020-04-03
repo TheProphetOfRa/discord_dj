@@ -45,7 +45,7 @@ namespace Discord_DJ.Commands
             var channel = (Context.User as IGuildUser)?.VoiceChannel;
             if (channel == null)
             {
-                await Context.Channel.SendMessageAsync("You need to be in a voice channel to stop music.");
+                await ReplyAsync("You need to be in a voice channel to stop music.");
                 return;
             }
 
@@ -62,11 +62,34 @@ namespace Discord_DJ.Commands
             var channel = (Context.User as IGuildUser)?.VoiceChannel;
             if (channel == null)
             {
-                await Context.Channel.SendMessageAsync("You need to be in a voice channel to skip music.");
+                await ReplyAsync("You need to be in a voice channel to skip music.");
                 return;
             }
 
             MusicServiceResult result = await MusicService.Skip(Context.Guild.Id, channel);
+            if (result == MusicServiceResult.AlreadyPlayingInAnotherChannel)
+            {
+                await ReplyAsync("I'm not playing music in your channel");
+            }
+        }
+
+        [Command("skipto")]
+        public async Task SkipTo(int songIndex)
+        {
+            var channel = (Context.User as IGuildUser)?.VoiceChannel;
+            if (channel == null)
+            {
+                await ReplyAsync("You need to be in a voice channel to skip music.");
+                return;
+            }
+
+            if (songIndex < 1 || songIndex >= MusicService.Queue(Context.Guild.Id).Count)
+            {
+                await ReplyAsync("Please select a number to skip to. You can see what's comming with the queue command.");
+                return;
+            }
+
+            MusicServiceResult result = await MusicService.SkipTo(Context.Guild.Id, channel, songIndex);
             if (result == MusicServiceResult.AlreadyPlayingInAnotherChannel)
             {
                 await ReplyAsync("I'm not playing music in your channel");
@@ -87,7 +110,7 @@ namespace Discord_DJ.Commands
 
             if (queue.Count == 0)
             {
-                ReplyAsync("There are no more songs in the queue. Let's add some!");
+                await ReplyAsync("There are no more songs in the queue. Let's add some!");
                 return;
             }
 

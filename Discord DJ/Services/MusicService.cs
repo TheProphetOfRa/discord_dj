@@ -43,6 +43,12 @@ namespace Discord_DJ.Services
             return await guildPlayer.Skip(channel);
         }
 
+        public async Task<MusicServiceResult> SkipTo(ulong guildId, IVoiceChannel channel, int songIndex)
+        {
+            MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);
+            return await guildPlayer.SkipTo(channel, songIndex);
+        }
+
         public List<string> Queue(ulong guildId)
         {
             MusicPlayer guildPlayer = GetMusicPlayerForGuild(guildId);

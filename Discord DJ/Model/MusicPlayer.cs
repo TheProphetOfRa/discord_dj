@@ -174,6 +174,22 @@ namespace Discord_DJ.Model
             return MusicServiceResult.Success;
         }
 
+        public async Task<MusicServiceResult> SkipTo(IVoiceChannel channel, int songIndex)
+        {
+            if (_isPlaying && _channel.Id != channel.Id)
+            {
+                return MusicServiceResult.AlreadyPlayingInAnotherChannel;
+            }
+
+            _queuedUrls.RemoveRange(0, songIndex - 1);
+
+            //Cache this locally as the recursive Play function will set up a new one for the next track which will be associated with the member variable
+            CancellationTokenSource canceller = _streamCanceller;
+            canceller.Cancel();
+            canceller.Dispose();
+            return MusicServiceResult.Success;
+        }
+
         private Process CreateStream(string url) //TODO: Move this to it's own class that can return the relevant process based on system
         {
             string args = $"/C youtube-dl -o - {url} | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1";
