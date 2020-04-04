@@ -139,7 +139,7 @@
         {
           "url": "https://www.youtube.com/watch?v=SgM3r8xKfGE",
           "singer": ["flo rida"],
-          "title": ["club cant handle me"]
+          "title": ["club can't handle me", "club cant handle me"]
         },
         {
           "url": "https://www.youtube.com/watch?v=Wx9XYrRpHjo",
@@ -264,7 +264,7 @@
         {
           "url": "https://www.youtube.com/watch?v=OZnBt2W48A0",
           "singer": ["snoop dogg"],
-          "title": ["drop it like its hot"]
+          "title": ["drop it like it's hot" , "drop is like its hot"]
         },
         {
           "url": "https://www.youtube.com/watch?v=a1BS7XnEZqc",
@@ -469,7 +469,7 @@
         {
           "url": "https://www.youtube.com/watch?v=50eVxQGkiok",
           "singer": ["Guns N Roses"],
-          "title": ["Sweet Child O' Mine", "Sweet Child O' Mine"]
+          "title": ["Sweet Child O' Mine", "Sweet Child O Mine"]
         },
         {
           "url": "https://www.youtube.com/watch?v=tux7eKFZn30",
@@ -693,7 +693,7 @@
         },
         {
             "url": "https://www.youtube.com/watch?v=pbIiIC6zN68",
-            "singer": ["sean mendes"],
+            "singer": ["shawn mendes"],
             "title": ["there's nothing holding me back", "theres nothing holding me back"]
         },
         {
