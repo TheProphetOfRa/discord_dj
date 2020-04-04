@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Discord DJ": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\david\\Projects\\discord_dj\\Discord DJ"
+    }
+  }
+}

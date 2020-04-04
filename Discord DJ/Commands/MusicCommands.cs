@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord_DJ.Model;
 using Discord_DJ.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;

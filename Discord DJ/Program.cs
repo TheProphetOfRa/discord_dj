@@ -1,5 +1,4 @@
-﻿using Discord_DJ.Commands;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
@@ -47,8 +46,9 @@ namespace Discord_DJ
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<GoogleAPIService>()
-                .AddSingleton<MusicService>()
                 .AddSingleton<YoutubeDLService>()
+                .AddSingleton<TriviaService>()
+                .AddSingleton<MusicService>()
                 .BuildServiceProvider();
         }
     }

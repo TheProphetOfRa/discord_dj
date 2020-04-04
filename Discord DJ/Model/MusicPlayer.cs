@@ -14,12 +14,6 @@ namespace Discord_DJ.Model
 {
     public class MusicPlayer
     {
-        public class VideoInfo
-        {
-            public string title;
-            public string url;
-        };
-
         public delegate void OnFinishedQueueDelegate(MusicPlayer player);
 
         private readonly GoogleAPIService _googleAPIService;
@@ -151,7 +145,7 @@ namespace Discord_DJ.Model
                 {
                     await _channel.DisconnectAsync();
                     _isPlaying = false;
-                    OnFinishedQueue(this);
+                    OnFinishedQueue?.Invoke(this);
                 }
             }
         }

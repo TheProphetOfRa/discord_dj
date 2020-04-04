@@ -1,9 +1,7 @@
-﻿using Google.Apis.Services;
+﻿using Discord_DJ.Model;
+using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using Google.Apis.YouTube.v3.Data;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using static Discord_DJ.Model.MusicPlayer;
 

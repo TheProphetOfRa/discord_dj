@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using ytdl_cs;
@@ -21,7 +19,7 @@ namespace Discord_DJ.Services
             _youtubeDownloader = new Ytdl();
         }
 
-        public async Task<Model.MusicPlayer.VideoInfo> GetInfoForVideoUrl(string videoUrl)
+        public async Task<Model.VideoInfo> GetInfoForVideoUrl(string videoUrl)
         {
             Uri videoUri = new Uri(videoUrl);
             NameValueCollection query = HttpUtility.ParseQueryString(videoUri.Query);
@@ -43,7 +41,7 @@ namespace Discord_DJ.Services
                 return null;
             }
 
-            return new Model.MusicPlayer.VideoInfo
+            return new Model.VideoInfo
             {
                 title = info.Title,
                 url = videoUrl
