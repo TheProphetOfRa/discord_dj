@@ -18,8 +18,8 @@ namespace Discord_DJ.Commands
                 await Context.Channel.SendMessageAsync("Please join a voice channel and try again.");
                 return;
             }
-
-            TriviaServiceResult result = await TriviaService.StartQuizForGuild(Context.Guild.Id, channel, numQuestions);
+            
+            TriviaServiceResult result = await TriviaService.StartQuizForGuild(Context.Guild.Id, channel, Context.Message.Channel, numQuestions);
 
             if (result == TriviaServiceResult.AlreadyRunningQuiz)
             {

@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Discord.WebSocket;
 using Discord_DJ.Model;
 using Newtonsoft.Json;
 using System;
@@ -12,6 +13,7 @@ namespace Discord_DJ.Services
     public enum TriviaServiceResult
     {
         AlreadyRunningQuiz,
+        NotRunningQuiz,
         Success
     };
 
@@ -36,7 +38,7 @@ namespace Discord_DJ.Services
             _triviaItems = JsonConvert.DeserializeObject<List<TriviaItem>>(File.ReadAllText("Resources/Music/trivia.json"));
         }
 
-        public async Task<TriviaServiceResult> StartQuizForGuild(ulong guildId, IVoiceChannel channel, int numQuestions)
+        public async Task<TriviaServiceResult> StartQuizForGuild(ulong guildId, IVoiceChannel channel, IChannel textChannel, int numQuestions)
         {
             if (_mapGuildIdsToQuizes.ContainsKey(guildId))
             {
@@ -47,8 +49,24 @@ namespace Discord_DJ.Services
 
             List<TriviaItem> itemsForQuiz = _triviaItems.Take(5).ToList();
 
-            TriviaQuiz quiz = new TriviaQuiz(guildId, channel, itemsForQuiz);
+            TriviaQuiz quiz = new TriviaQuiz(guildId, channel, textChannel, itemsForQuiz);
             await quiz.StartQuiz();
+            return TriviaServiceResult.Success;
+        }
+
+        public bool IsGuildRunningQuizInChannel(ulong guildId, IChannel channel)
+        {
+            return _mapGuildIdsToQuizes.ContainsKey(guildId) && _mapGuildIdsToQuizes[guildId].TextChannel == channel;
+        }
+
+        public async Task<TriviaServiceResult> ProcessAnswer(ulong guildId, SocketUserMessage message)
+        {
+            if (!_mapGuildIdsToQuizes.ContainsKey(guildId))
+            {
+                return TriviaServiceResult.NotRunningQuiz;
+            }
+
+            _mapGuildIdsToQuizes[guildId].ProcessAnswer(message);
             return TriviaServiceResult.Success;
         }
     }

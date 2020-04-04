@@ -14,10 +14,13 @@ namespace Discord_DJ.Services
         private readonly DiscordSocketClient _discord;
         private readonly IServiceProvider _services;
 
+        private readonly TriviaService _triviaService;
+
         public CommandHandlingService(IServiceProvider services)
         {
             _commands = services.GetRequiredService<CommandService>();
             _discord = services.GetRequiredService<DiscordSocketClient>();
+            _triviaService = services.GetRequiredService<TriviaService>();
             _services = services;
 
             _commands.CommandExecuted += CommandExecutedAsync;
@@ -36,19 +39,25 @@ namespace Discord_DJ.Services
                 return;
             }
 
-            if (message.Source != Discord.MessageSource.User)
+            if (message.Source != MessageSource.User)
             {
                 return;
             }
 
             int argPos = 0;
 
+            SocketCommandContext context = new SocketCommandContext(_discord, message);
+
+            if (_triviaService.IsGuildRunningQuizInChannel(context.Guild.Id, message.Channel))
+            {
+                await _triviaService.ProcessAnswer(context.Guild.Id, message);
+            }
+
             if (!message.HasCharPrefix('+', ref argPos))
             {
                 return;
             }
 
-            SocketCommandContext context = new SocketCommandContext(_discord, message);
 
             await _commands.ExecuteAsync(context: context, argPos: argPos, services: _services);
         }
