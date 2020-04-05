@@ -17,6 +17,8 @@ namespace Discord_DJ.Model
 {
     public class TriviaQuiz
     {
+        private static Color kEmbedColor = new Color(0xff7373);
+
         public delegate void OnFinishedQuestionsDelegate(TriviaQuiz quiz);
 
         private ulong _guildId;
@@ -80,6 +82,12 @@ namespace Discord_DJ.Model
                     _mapIdsToUsernames.Add(member.Id, member.Username);
                 }
             }
+
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.WithTitle("Starting Music Quiz!");
+            builder.WithColor(kEmbedColor);
+            builder.WithDescription("Get ready! There are 15 songs, you have 30 seconds to guess either the singer/band or the name of the song. Good Luck! You can end the quiz using the end-trivia command");
+            await (_textChannel as ISocketMessageChannel).SendMessageAsync("", false, builder.Build());
 
             PlaySnippet(_questions[0]);
 
@@ -203,6 +211,7 @@ namespace Discord_DJ.Model
             TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
 
             EmbedBuilder builder = new EmbedBuilder();
+            builder.WithColor(kEmbedColor);
             builder.WithTitle($"The song was: {textInfo.ToTitleCase(_currentItem.title[0])} - {textInfo.ToTitleCase(_currentItem.singer[0])}");
             var items = from pair in _mapPlayersToScores orderby pair.Value descending select pair;
             foreach (KeyValuePair<ulong, int> pair in items)
@@ -216,6 +225,7 @@ namespace Discord_DJ.Model
         {
             var items = from pair in _mapPlayersToScores orderby pair.Value descending select pair;
             EmbedBuilder builder = new EmbedBuilder();
+            builder.WithColor(kEmbedColor);
             int i = 0;
             foreach (KeyValuePair<ulong, int> pair in items)
             {

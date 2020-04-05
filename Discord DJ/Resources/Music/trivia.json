@@ -322,7 +322,7 @@
   {
     "url": "https://www.youtube.com/watch?v=8wP2AsnTfac",
     "singer": [ "the weeknd" ],
-    "title": [ "cant feel my face" ]
+    "title": ["can't feel my face", "cant feel my face" ]
   },
   {
     "url": "https://www.youtube.com/watch?v=Coq-OlEdZQ8",
@@ -726,17 +726,17 @@
   },
   {
     "url": "https://www.youtube.com/watch?v=Jbp52Z9jRg0",
-    "singer": [ "mulan", "disney" ],
+    "singer": [ "mulan", "Li Shang" ],
     "title": [ "i'll make a man out of you", "ill make a man out of you" ]
   },
   {
     "url": "https://www.youtube.com/watch?v=mbom691n-14",
-    "singer": [ "The Lion King", "lion king", "timone and pumba", "timone & pumba", "disney" ],
+    "singer": [ "The Lion King", "lion king", "timone and pumba", "timone & pumba" ],
     "title": [ "hakuna matata" ]
   },
   {
     "url": "https://www.youtube.com/watch?v=gS8nZ8p-xnU",
-    "singer": [ "Frozen", "Elsa", "disney", "idina menzel" ],
+    "singer": [ "Frozen", "Elsa", "idina menzel" ],
     "title": [ "let it go" ]
   },
   {
@@ -753,5 +753,50 @@
     "url": "https://www.youtube.com/watch?v=1nCqRmx3Dnw",
     "singer": [ "Will Smith", "the fresh prince", "fresh prince" ],
     "title": [ "the fresh prince of bel air", "fresh prince of bel air", "fresh prince", "the fresh prince" ]
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=5ZYgIrqELFw0",
+    "singer": [ "smash mouth" ],
+    "title": [ "all star" ]
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=3Fzi4lBzqIg",
+    "singer": [ "simple plan" ],
+    "title": [ "What's new scooby-doo", "whats new scooby-doo", "what's new scooby doo", "whats new scooby doo" ]
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
+  },
+  {
+    "url": "",
+    "singer": [],
+    "title": []
   }
 ]
