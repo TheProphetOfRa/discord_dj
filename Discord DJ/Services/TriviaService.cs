@@ -50,6 +50,7 @@ namespace Discord_DJ.Services
             List<TriviaItem> itemsForQuiz = _triviaItems.Take(5).ToList();
 
             TriviaQuiz quiz = new TriviaQuiz(guildId, channel, textChannel, itemsForQuiz);
+            _mapGuildIdsToQuizes.Add(guildId, quiz);
             await quiz.StartQuiz();
             return TriviaServiceResult.Success;
         }

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,6 +34,9 @@ namespace Discord_DJ.Model
         private TriviaItem _currentItem;
         private bool _foundSinger = false;
         private bool _foundTitle = false;
+        private bool _endingItem = false;
+
+        private Dictionary<ulong, int> _mapPlayersToScores = new Dictionary<ulong, int>();
 
         public event OnFinishedQuestionsDelegate OnFinishedQuestions;
 
@@ -52,9 +56,20 @@ namespace Discord_DJ.Model
 
         public async Task<TriviaServiceResult> StartQuiz()
         {
-            _audioConnection = await _channel.ConnectAsync();
+            if (_audioConnection == null || _audioConnection.ConnectionState != ConnectionState.Connected)
+            {
+                _audioConnection = await _channel.ConnectAsync();
+            }
 
-            //TODO: Build player table
+            var channelMembers = await _channel.GetUsersAsync().FlattenAsync();
+
+            foreach (IGuildUser member in channelMembers)
+            {
+                if (!member.IsBot)
+                {
+                    _mapPlayersToScores.Add(member.Id, 0);
+                }
+            }
 
             PlaySnippet(_questions[0]);
 
@@ -65,8 +80,6 @@ namespace Discord_DJ.Model
         {
             _questions.RemoveAt(0);
             _currentItem = item;
-            _foundTitle = false;
-            _foundSinger = false;
 
             if (_streamCanceller != null)
             {
@@ -92,17 +105,23 @@ namespace Discord_DJ.Model
 
         public async Task ProcessAnswer(SocketUserMessage answer)
         {
+            string lowerAnswer = answer.Content.ToLower();
+            if (!_mapPlayersToScores.ContainsKey(answer.Author.Id))
+            {
+                return;
+            }
+
             bool consumed = false;
 
             if (!_foundSinger)
             {
                 foreach (string singer in _currentItem.singer)
                 {
-                    if (answer.Content == singer)
+                    if (lowerAnswer == singer.ToLower())
                     {
                         consumed = true;
                         _foundSinger = true;
-                        //TODO credit user points
+                        _mapPlayersToScores[answer.Author.Id] += 1;
                         break;
                     }
                 }
@@ -112,11 +131,11 @@ namespace Discord_DJ.Model
             {
                 foreach (string title in _currentItem.title)
                 {
-                    if (answer.Content == title)
+                    if (lowerAnswer == title.ToLower())
                     {
                         consumed = true;
                         _foundTitle = true;
-                        //TODO credit user points
+                        _mapPlayersToScores[answer.Author.Id] += 1;
                         break;
                     }
                 }
@@ -128,13 +147,13 @@ namespace Discord_DJ.Model
                 {
                     foreach (string singer in _currentItem.singer)
                     {
-                        if (answer.Content == title + ' ' + singer ||
-                            answer.Content == singer + ' ' + title)
+                        if (lowerAnswer == title.ToLower() + ' ' + singer.ToLower() ||
+                            lowerAnswer == singer.ToLower() + ' ' + title.ToLower())
                         {
                             consumed = true;
                             _foundTitle = true;
                             _foundSinger = true;
-                            //TODO credit user points;
+                            _mapPlayersToScores[answer.Author.Id] += _foundSinger || _foundTitle ? 1 : 2;
                             break;
                         }
                     } 
@@ -145,6 +164,15 @@ namespace Discord_DJ.Model
                 }
             }
 
+            if (consumed)
+            {
+                await answer.AddReactionAsync(new Emoji("\u2611"));
+            }
+            else
+            {
+                await answer.AddReactionAsync(new Emoji("\u274C"));
+            }
+
             if (_foundSinger && _foundTitle)
             {
                 await EndSnippet();
@@ -153,31 +181,60 @@ namespace Discord_DJ.Model
 
         private async Task ShowQuestionCard(TriviaItem question)
         {
-            //TODO: show embedded leaderboard with song title
+            EmbedBuilder builder = new EmbedBuilder();
+            builder.WithTitle($"The song was: {_currentItem.title[0]} - {_currentItem.singer[0]}");
+            var items = from pair in _mapPlayersToScores orderby pair.Value descending select pair;
+            foreach (KeyValuePair<ulong, int> pair in items)
+            {
+                builder.AddField(pair.Key.ToString(), pair.Value, false);
+            }
+            await (_textChannel as ISocketMessageChannel).SendMessageAsync("", false, builder.Build());
         }
 
         private async Task ShowFinalLeaderboard()
         {
-            //TODO: show embedded leaderboard with victor!
+            var items = from pair in _mapPlayersToScores orderby pair.Value descending select pair;
+            EmbedBuilder builder = new EmbedBuilder();
+            int i = 0;
+            foreach (KeyValuePair<ulong, int> pair in items)
+            {
+                if (i == 0)
+                {
+                    builder.WithTitle($"{new Emoji("👑")} The winner is: {pair.Key}");
+                }
+                else
+                {
+                    builder.AddField(pair.Key.ToString(), pair.Value, false);
+                }
+                ++i;
+            }
+            await (_textChannel as ISocketMessageChannel).SendMessageAsync("", false, builder.Build());
         }
 
         private async Task EndSnippet()
         {
-            ShowQuestionCard(_currentItem);
-            _streamCanceller.Cancel();
-            _streamProcess.Dispose();
-            _outputStream.Dispose();
-            _discordStream.Dispose();
+            if (!_endingItem)
+            {
+                _endingItem = true;
+                ShowQuestionCard(_currentItem);
+                _streamCanceller.Cancel();
+                _streamProcess.Dispose();
+                _outputStream.Dispose();
+                _discordStream.Dispose();
+                _foundSinger = false;
+                _foundTitle = false;
 
-            if (_questions.Count > 0)
-            {
-                PlaySnippet(_questions[0]);
-            }
-            else
-            {
-                await ShowFinalLeaderboard();
-                await _channel.DisconnectAsync();
-                OnFinishedQuestions?.Invoke(this);
+                if (_questions.Count > 0)
+                {
+                    PlaySnippet(_questions[0]);
+                    _endingItem = false;
+                }
+                else
+                {
+                    await ShowFinalLeaderboard();
+                    await _channel.DisconnectAsync();
+                    OnFinishedQuestions?.Invoke(this);
+                }
             }
         }
 

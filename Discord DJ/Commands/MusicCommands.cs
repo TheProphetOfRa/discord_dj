@@ -121,7 +121,7 @@ namespace Discord_DJ.Commands
             int count = 1;
             foreach (VideoInfo entry in queue)
             {
-                builder.AddField(count.ToString(), entry.title, true);
+                builder.AddField(count.ToString(), entry.title, false);
                 count++;
             }
 
