@@ -37,6 +37,7 @@ namespace Discord_DJ.Model
         private bool _endingItem = false;
 
         private Dictionary<ulong, int> _mapPlayersToScores = new Dictionary<ulong, int>();
+        private Dictionary<ulong, string> _mapIdsToUsernames = new Dictionary<ulong, string>();
 
         public event OnFinishedQuestionsDelegate OnFinishedQuestions;
 
@@ -68,6 +69,7 @@ namespace Discord_DJ.Model
                 if (!member.IsBot)
                 {
                     _mapPlayersToScores.Add(member.Id, 0);
+                    _mapIdsToUsernames.Add(member.Id, member.Username);
                 }
             }
 
@@ -153,7 +155,7 @@ namespace Discord_DJ.Model
                             consumed = true;
                             _foundTitle = true;
                             _foundSinger = true;
-                            _mapPlayersToScores[answer.Author.Id] += _foundSinger || _foundTitle ? 1 : 2;
+                            _mapPlayersToScores[answer.Author.Id] += ((_foundSinger || _foundTitle) ? 1 : 2);
                             break;
                         }
                     } 
@@ -186,7 +188,7 @@ namespace Discord_DJ.Model
             var items = from pair in _mapPlayersToScores orderby pair.Value descending select pair;
             foreach (KeyValuePair<ulong, int> pair in items)
             {
-                builder.AddField(pair.Key.ToString(), pair.Value, false);
+                builder.AddField(_mapIdsToUsernames[pair.Key], pair.Value, false);
             }
             await (_textChannel as ISocketMessageChannel).SendMessageAsync("", false, builder.Build());
         }
@@ -200,11 +202,11 @@ namespace Discord_DJ.Model
             {
                 if (i == 0)
                 {
-                    builder.WithTitle($"{new Emoji("👑")} The winner is: {pair.Key}");
+                    builder.WithTitle($"{new Emoji("👑")} The winner is: {_mapIdsToUsernames[pair.Key]}");
                 }
                 else
                 {
-                    builder.AddField(pair.Key.ToString(), pair.Value, false);
+                    builder.AddField(_mapIdsToUsernames[pair.Key], pair.Value, false);
                 }
                 ++i;
             }
@@ -213,24 +215,26 @@ namespace Discord_DJ.Model
 
         private async Task EndSnippet()
         {
+            //Threads are hard
             if (!_endingItem)
             {
-                _endingItem = true;
-                ShowQuestionCard(_currentItem);
+                _endingItem = true;                
                 _streamCanceller.Cancel();
                 _streamProcess.Dispose();
                 _outputStream.Dispose();
                 _discordStream.Dispose();
                 _foundSinger = false;
                 _foundTitle = false;
+                await ShowQuestionCard(_currentItem);
 
                 if (_questions.Count > 0)
                 {
-                    PlaySnippet(_questions[0]);
                     _endingItem = false;
+                    await PlaySnippet(_questions[0]);
                 }
                 else
                 {
+                    _endingItem = false;
                     await ShowFinalLeaderboard();
                     await _channel.DisconnectAsync();
                     OnFinishedQuestions?.Invoke(this);
