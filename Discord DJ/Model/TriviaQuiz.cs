@@ -153,9 +153,9 @@ namespace Discord_DJ.Model
                             lowerAnswer == singer.ToLower() + ' ' + title.ToLower())
                         {
                             consumed = true;
+                            _mapPlayersToScores[answer.Author.Id] += ((_foundSinger || _foundTitle) ? 1 : 2);
                             _foundTitle = true;
                             _foundSinger = true;
-                            _mapPlayersToScores[answer.Author.Id] += ((_foundSinger || _foundTitle) ? 1 : 2);
                             break;
                         }
                     } 
