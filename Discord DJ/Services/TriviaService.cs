@@ -70,5 +70,16 @@ namespace Discord_DJ.Services
             _mapGuildIdsToQuizes[guildId].ProcessAnswer(message);
             return TriviaServiceResult.Success;
         }
+
+        public TriviaServiceResult EndQuiz(ulong guildId)
+        {
+            if (!_mapGuildIdsToQuizes.ContainsKey(guildId))
+            {
+                return TriviaServiceResult.NotRunningQuiz;
+            }
+
+            _mapGuildIdsToQuizes[guildId].EndQuiz();
+            return TriviaServiceResult.Success;
+        }
     }
 }

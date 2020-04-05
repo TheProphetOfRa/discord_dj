@@ -26,5 +26,18 @@ namespace Discord_DJ.Commands
                 await ReplyAsync("I'm already hosting a quiz, wait until this one's finished then come join the fun!");
             }
         }
+
+        [Command("end-trivia")]
+        public async Task EndTrivia()
+        {
+            var channel = (Context.User as IGuildUser)?.VoiceChannel;
+            if (channel == null)
+            {
+                await Context.Channel.SendMessageAsync("Please join a voice channel and try again.");
+                return;
+            }
+
+            TriviaService.EndQuiz(Context.Guild.Id);
+        }
     }
 }

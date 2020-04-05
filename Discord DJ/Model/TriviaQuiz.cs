@@ -179,7 +179,13 @@ namespace Discord_DJ.Model
             {
                 await EndSnippet();
             }
-        }       
+        }    
+        
+        public void EndQuiz()
+        {
+            _questions.Clear();
+            EndSnippet();
+        }
 
         private async Task ShowQuestionCard(TriviaItem question)
         {

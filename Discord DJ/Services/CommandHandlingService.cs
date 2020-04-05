@@ -47,18 +47,16 @@ namespace Discord_DJ.Services
 
             int argPos = 0;
 
-            SocketCommandContext context = new SocketCommandContext(_discord, message);
-
-            if (_triviaService.IsGuildRunningQuizInChannel(context.Guild.Id, message.Channel))
-            {
-                await _triviaService.ProcessAnswer(context.Guild.Id, message);
-            }
+            SocketCommandContext context = new SocketCommandContext(_discord, message);            
 
             if (!message.HasCharPrefix('+', ref argPos))
             {
+                if (_triviaService.IsGuildRunningQuizInChannel(context.Guild.Id, message.Channel))
+                {
+                    await _triviaService.ProcessAnswer(context.Guild.Id, message);
+                }
                 return;
             }
-
 
             await _commands.ExecuteAsync(context: context, argPos: argPos, services: _services);
         }
