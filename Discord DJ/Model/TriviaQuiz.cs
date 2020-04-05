@@ -7,6 +7,7 @@ using Discord_DJ.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -19,6 +20,13 @@ namespace Discord_DJ.Model
         public delegate void OnFinishedQuestionsDelegate(TriviaQuiz quiz);
 
         private ulong _guildId;
+        public ulong GuildId
+        {
+            get
+            {
+                return _guildId;
+            }
+        }
         private IVoiceChannel _channel;
         private readonly IChannel _textChannel;
         private List<TriviaItem> _questions;
@@ -91,7 +99,10 @@ namespace Discord_DJ.Model
             _streamCanceller = new CancellationTokenSource();
             _streamProcess = CreateStream(item.url);
             _outputStream = _streamProcess.StandardOutput.BaseStream;
-            _discordStream = _audioConnection.CreatePCMStream(AudioApplication.Music);
+            if (_discordStream == null)
+            {
+                _discordStream = _audioConnection.CreatePCMStream(AudioApplication.Music);
+            }
 
             try
             {
@@ -179,7 +190,7 @@ namespace Discord_DJ.Model
             {
                 await EndSnippet();
             }
-        }    
+        }
         
         public void EndQuiz()
         {
@@ -189,8 +200,10 @@ namespace Discord_DJ.Model
 
         private async Task ShowQuestionCard(TriviaItem question)
         {
+            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+
             EmbedBuilder builder = new EmbedBuilder();
-            builder.WithTitle($"The song was: {_currentItem.title[0]} - {_currentItem.singer[0]}");
+            builder.WithTitle($"The song was: {textInfo.ToTitleCase(_currentItem.title[0])} - {textInfo.ToTitleCase(_currentItem.singer[0])}");
             var items = from pair in _mapPlayersToScores orderby pair.Value descending select pair;
             foreach (KeyValuePair<ulong, int> pair in items)
             {
@@ -228,8 +241,7 @@ namespace Discord_DJ.Model
                 _endingItem = true;                
                 _streamCanceller.Cancel();
                 _streamProcess.Dispose();
-                _outputStream.Dispose();
-                _discordStream.Dispose();
+                _outputStream.Dispose();                
                 _foundSinger = false;
                 _foundTitle = false;
                 await ShowQuestionCard(_currentItem);
@@ -241,6 +253,7 @@ namespace Discord_DJ.Model
                 }
                 else
                 {
+                    _discordStream.Dispose();
                     _endingItem = false;
                     await ShowFinalLeaderboard();
                     await _channel.DisconnectAsync();

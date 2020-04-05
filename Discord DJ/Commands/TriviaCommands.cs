@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord_DJ.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace Discord_DJ.Commands

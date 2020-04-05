@@ -47,12 +47,18 @@ namespace Discord_DJ.Services
 
             _triviaItems.Shuffle();
 
-            List<TriviaItem> itemsForQuiz = _triviaItems.Take(5).ToList();
+            List<TriviaItem> itemsForQuiz = _triviaItems.Take(numQuestions).ToList();
 
             TriviaQuiz quiz = new TriviaQuiz(guildId, channel, textChannel, itemsForQuiz);
             _mapGuildIdsToQuizes.Add(guildId, quiz);
+            quiz.OnFinishedQuestions += OnQuizFinished;
             await quiz.StartQuiz();
             return TriviaServiceResult.Success;
+        }
+
+        private void OnQuizFinished(TriviaQuiz quiz)
+        {
+            _mapGuildIdsToQuizes.Remove(quiz.GuildId);
         }
 
         public bool IsGuildRunningQuizInChannel(ulong guildId, IChannel channel)
