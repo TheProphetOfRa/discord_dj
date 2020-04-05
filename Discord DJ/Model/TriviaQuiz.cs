@@ -202,7 +202,8 @@ namespace Discord_DJ.Model
             {
                 if (i == 0)
                 {
-                    builder.WithTitle($"{new Emoji("👑")} The winner is: {_mapIdsToUsernames[pair.Key]}");
+                    builder.WithTitle($"{new Emoji("👑")} The winner is: {_mapIdsToUsernames[pair.Key]} with {pair.Value} points!");
+                    builder.AddField(_mapIdsToUsernames[pair.Key], pair.Value, false);
                 }
                 else
                 {
