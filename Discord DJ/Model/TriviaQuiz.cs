@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -274,10 +275,24 @@ namespace Discord_DJ.Model
 
         private Process CreateStream(string url) //TODO: Move this to it's own class that can return the relevant process based on system
         {
-            string args = $"/C youtube-dl -o - {url} | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1";
+            string filename = "";
+            string args = "";
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                filename = "cmd.exe";
+                args = "/C";
+            }
+            else
+            {
+                filename = "/bin/bash";
+                args = "-c";
+            }
+            args += $" \"youtube-dl -o - {url} | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1\"";
+
             return Process.Start(new ProcessStartInfo
             {
-                FileName = "cmd.exe",
+                FileName = filename,
                 Arguments = args,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
