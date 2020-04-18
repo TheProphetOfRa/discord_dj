@@ -19,7 +19,7 @@ namespace Discord_DJ.Services
 
     public struct TriviaItem
     {
-        public string url;
+        public string filepath;
         public List<string> singer;
         public List<string> title;
     }

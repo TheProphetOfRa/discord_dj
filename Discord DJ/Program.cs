@@ -45,10 +45,7 @@ namespace Discord_DJ
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<GoogleAPIService>()
-                .AddSingleton<YoutubeDLService>()
                 .AddSingleton<TriviaService>()
-                .AddSingleton<MusicService>()
                 .BuildServiceProvider();
         }
     }

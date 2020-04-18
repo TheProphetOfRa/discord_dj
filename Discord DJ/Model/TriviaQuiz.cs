@@ -106,7 +106,7 @@ namespace Discord_DJ.Model
             }
 
             _streamCanceller = new CancellationTokenSource();
-            _streamProcess = CreateStream(item.url);
+            _streamProcess = CreateStream("Resources/Music/" + item.filepath);
             _outputStream = _streamProcess.StandardOutput.BaseStream;
             if (_discordStream == null)
             {
@@ -273,27 +273,12 @@ namespace Discord_DJ.Model
             }
         }
 
-        private Process CreateStream(string url) //TODO: Move this to it's own class that can return the relevant process based on system
+        private Process CreateStream(string filepath)
         {
-            string filename = "";
-            string args = "";
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                filename = "cmd.exe";
-                args = "/C";
-            }
-            else
-            {
-                filename = "/bin/bash";
-                args = "-c";
-            }
-            args += $" \"youtube-dl -o - {url} | ffmpeg -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1\"";
-
             return Process.Start(new ProcessStartInfo
             {
-                FileName = filename,
-                Arguments = args,
+                FileName = "ffmpeg",
+                Arguments = $"-i \"{filepath}\" -ac 2 -f s16le -ar 48000 pipe:1",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true
