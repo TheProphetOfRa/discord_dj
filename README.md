@@ -1,20 +1,17 @@
 # discord_dj
 
-## Requirements
-Node 12
-An unprivelidged user: discord_dj
+A Music Trivia bot written in C# for Discord.
 
-## Install
+To run:
 
-Check out or symlink this project to /opt/discord_dj
+Replace trivia.json with your desired trivia items and then add the music files in 48000Hz OPUS files.
 
-symlink discord_dj.service /libs/systemd/system/discord_dj.service
+Then build using VS2019.
 
-run: 
-sudo systemctl daemon-reload
-sudo systemctl start discord_dj
+Currently this does not work on Linux as there is some problem copying the output from ffmpeg to the discord library.
 
-If you want to have the service run automatically at boot run:
-sudo systemctl enable discord_dj
+You will also need to make sure that the opus and libsodium dlls are copied to your build directory and all the files from your Resources folder.
 
+If you do not have ffmpeg installed system wide it will need to be included in the build directory also.
 
+As a final point you will need to follow discords documentation to setup a bot and then configure a config.json file in the build directory with your API key listed under "botAPIKey"
